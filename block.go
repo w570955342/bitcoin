@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"crypto/sha256"
+	"encoding/binary"
+	"log"
 	"time"
 )
 
@@ -27,21 +30,26 @@ type Block struct {
 }
 
 func Uint64ToByte(num uint64) []byte {
-	//TODO
-	return []byte{}
+	var buffer bytes.Buffer
+	err := binary.Write(&buffer, binary.BigEndian, num)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return buffer.Bytes()
 }
 
 //2. 创建区块
 func NewBlock(data string, prevBlockHash []byte) *Block {
 	block := Block{
-		Version:00,
-		PrevHash: prevBlockHash,
-		MerkelRoot:[]byte{},
-		TimeStamp:uint64(time.Now().Unix()),
-		Difficulty:0,
-		Nonce:0,
-		Hash:     []byte{}, //先填空，后面再计算 //TODO
-		Data:     []byte(data),
+		Version:    00,
+		PrevHash:   prevBlockHash,
+		MerkelRoot: []byte{},
+		TimeStamp:  uint64(time.Now().Unix()),
+		Difficulty: 0,
+		Nonce:      0,
+		Hash:       []byte{}, //先填空，后面再计算 //TODO
+		Data:       []byte(data),
 	}
 
 	block.SetHash()
@@ -58,7 +66,8 @@ func (block *Block) SetHash() {
 	blockInfo = append(blockInfo, Uint64ToByte(block.TimeStamp)...)
 	blockInfo = append(blockInfo, Uint64ToByte(block.Difficulty)...)
 	blockInfo = append(blockInfo, Uint64ToByte(block.Nonce)...)
-	blockInfo = append(block.PrevHash, block.Data...)
+	//blockInfo = append(block.PrevHash, block.Data...)//错误
+	blockInfo = append(blockInfo, block.Data...)
 
 	//2. sha256
 	hash := sha256.Sum256(blockInfo)
