@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"crypto/sha256"
+	"fmt"
 )
 
 //1. 定义区块结构
@@ -38,14 +38,37 @@ func (block *Block) SetHash() {
 }
 
 //4. 引入区块链
-//5. 添加区块
-//6. 重构代码
+type BlockChain struct {
+	//定义一个区块链数组
+	blocks []*Block
+}
+
+//5.创建区块链
+func NewBlockChain() *BlockChain {
+	//创建一个创世块，并作为第一个区块添加到区块链中
+	genesisBlock := GenesisBlock()
+	return &BlockChain{
+		blocks: []*Block{genesisBlock},
+	}
+}
+
+//创建一个创世区块
+func GenesisBlock() *Block{
+	return NewBlock("这是一个关于创世区块的故事",[]byte{})
+}
+
+//6. 添加区块
+//7. 重构代码
 
 func main() {
-	block := NewBlock("用两万个比特币买了一张pizza！", []byte{})
+	blockChain:=NewBlockChain()
 
-	fmt.Printf("前区块哈希值： %x\n", block.PrevHash)
-	fmt.Printf("当前区块哈希值： %x\n", block.Hash)
-	fmt.Printf("区块数据 :%s\n", block.Data)
-	fmt.Println("成功生成新的区块！")
+	for idx,block:=range blockChain.blocks{
+		fmt.Printf("================================= 当前区块高度：%d =================================\n",idx)
+		fmt.Printf("前区块哈希值： %x\n", block.PrevHash)
+		fmt.Printf("当前区块哈希值： %x\n", block.Hash)
+		fmt.Printf("区块数据 :%s\n", block.Data)
+		fmt.Println("成功生成新的区块！")
+	}
+
 }
