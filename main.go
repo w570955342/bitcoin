@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"crypto/sha256"
+)
 
 //1. 定义区块结构
 type Block struct {
@@ -20,10 +23,20 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 		Data:     []byte(data),
 	}
 
+	block.SetHash()
 	return &block
 }
 
-//3. 生成哈希
+//3. 为Block绑定方法生成哈希
+func (block *Block) SetHash() {
+	//1. 拼接数据
+	blockInfo := append(block.PrevHash, block.Data...)
+
+	//2. sha256
+	hash := sha256.Sum256(blockInfo)
+	block.Hash = hash[:]
+}
+
 //4. 引入区块链
 //5. 添加区块
 //6. 重构代码
