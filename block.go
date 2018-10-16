@@ -28,6 +28,12 @@ type Block struct {
 	Data []byte
 }
 
+//序列化
+func (block *Block) Serialize() []byte {
+
+	return []byte{}//Todo
+}
+
 func Uint64ToByte(num uint64) []byte {
 	var buffer bytes.Buffer
 	err := binary.Write(&buffer, binary.BigEndian, num)
@@ -51,8 +57,8 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 		Data:       []byte(data),
 	}
 
-	pow:=NewProofOfWork(&block)
-	block.Hash,block.Nonce=pow.Run()
+	pow := NewProofOfWork(&block)
+	block.Hash, block.Nonce = pow.Run()
 	return &block
 }
 
