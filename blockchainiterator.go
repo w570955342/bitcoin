@@ -2,6 +2,7 @@ package main
 
 import (
 	"bolt"
+	"log"
 )
 
 type BlockChainIterator struct {
