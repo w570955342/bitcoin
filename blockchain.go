@@ -24,7 +24,7 @@ func NewBlockChain() *BlockChain {
 	if err != nil {
 		log.Panic(err)
 	}
-	defer db.Close()
+	//defer db.Close()  //关闭后就不能持续添加区块了，除非添加的时候再次打开
 
 	db.Update(func(tx *bolt.Tx) error {
 		//2. 找到抽屉,没有就创建
