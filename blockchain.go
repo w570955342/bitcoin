@@ -19,7 +19,7 @@ const BlockBucket = "blockBucket"
 //5.创建区块链
 func NewBlockChain() *BlockChain {
 	var lastBlockHash []byte
-	//1. 打开数据库
+	//1. 打开数据库 每次测试程序需要删除 blockChain.db
 	db, err := bolt.Open(BlockChainDb, 0600, nil)
 	if err != nil {
 		log.Panic(err)
@@ -42,6 +42,11 @@ func NewBlockChain() *BlockChain {
 			bucket.Put(genesisBlock.Hash, genesisBlock.Serialize())
 			bucket.Put([]byte("lastBlockHash"), genesisBlock.Hash)
 			lastBlockHash=genesisBlock.Hash
+
+			//测试数据，测试结束删除
+			//blockBytes:=bucket.Get(genesisBlock.Hash)
+			//block:=Deserialize(blockBytes)
+			//fmt.Printf("刚写入的区块信息%x\n",block.Hash)
 
 		}else {
 			lastBlockHash=bucket.Get([]byte("lastBlockHash"))

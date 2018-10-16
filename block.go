@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"log"
 	"time"
+	"encoding/gob"
 )
 
 //1. 定义区块结构
@@ -30,8 +31,27 @@ type Block struct {
 
 //序列化
 func (block *Block) Serialize() []byte {
+	var buffer bytes.Buffer
+	encoder:=gob.NewEncoder(&buffer)
+	err:=encoder.Encode(&block)
+	if err != nil {
+		log.Panic("编码出错！",err)
+	}
+	return buffer.Bytes()
+}
 
-	return []byte{}//Todo
+//反序列化
+func Deserialize(data []byte) Block {
+
+	decoder := gob.NewDecoder(bytes.NewReader(data))
+
+	var block Block
+	//使用解码器进行解码
+	err := decoder.Decode(&block)
+	if err != nil {
+		log.Panic("解码出错!", err)
+	}
+	return block
 }
 
 func Uint64ToByte(num uint64) []byte {
