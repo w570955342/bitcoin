@@ -2,7 +2,7 @@ package main
 
 //7. 重构代码
 func main() {
-	blockChain:=NewBlockChain()
+	blockChain:=NewBlockChain("bitcoin")
 	cli := CLI{blockChain}
 	cli.Run()
 	//blockChain.AddBlock("这位大哥用两万个比特币买了一张pizza！")
