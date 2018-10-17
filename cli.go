@@ -34,11 +34,24 @@ func (cli *CLI) Run() {
 	switch cmd {
 	case "addBlock":
 		//3. 执行相应动作
-		fmt.Printf("添加区块")
+		fmt.Printf("添加区块\n")
+
+		//确保命令有效
+		if len(args) == 4 && args[2] == "--data" {
+			//获取命令的数据
+			//a. 获取数据
+			data := args[3]
+			//b. 使用bc添加区块AddBlock
+			cli.AddBlock(data)
+		} else {
+			fmt.Printf("添加区块参数使用不当，请检查")
+			fmt.Printf(Usage)
+		}
 	case "printChain":
-		fmt.Printf("打印区块")
+		fmt.Printf("打印区块\n")
+		cli.PrinBlockChain()
 	default:
-		fmt.Printf("无效的命令，请检查!")
+		fmt.Printf("无效的命令，请检查!\n")
 		fmt.Printf(Usage)
 	}
 }
