@@ -3,9 +3,9 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/gob"
 	"log"
 	"time"
-	"encoding/gob"
 )
 
 //1. 定义区块结构
@@ -26,16 +26,18 @@ type Block struct {
 	//a. 当前区块哈希,正常比特币区块中没有当前区块的哈希！
 	Hash []byte
 	//b. 交易数据
-	Data []byte
+	//Data []byte
+	//使用切片存储一个区块中的所有交易信息（比特币大约200-2200不等）
+	Transactions []*Transaction
 }
 
 //序列化
 func (block *Block) Serialize() []byte {
 	var buffer bytes.Buffer
-	encoder:=gob.NewEncoder(&buffer)
-	err:=encoder.Encode(&block)
+	encoder := gob.NewEncoder(&buffer)
+	err := encoder.Encode(&block)
 	if err != nil {
-		log.Panic("编码出错！",err)
+		log.Panic("编码出错！", err)
 	}
 	return buffer.Bytes()
 }
@@ -65,7 +67,7 @@ func Uint64ToByte(num uint64) []byte {
 }
 
 //2. 创建区块
-func NewBlock(data string, prevBlockHash []byte) *Block {
+func NewBlock(txs []*Transaction, prevBlockHash []byte) *Block {
 	block := Block{
 		Version:    00,
 		PrevHash:   prevBlockHash,
@@ -74,8 +76,11 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 		Difficulty: 0,
 		Nonce:      0,
 		Hash:       []byte{}, //先填空，后面再计算 //TODO
-		Data:       []byte(data),
+		//Data:       []byte(data),
+		Transactions:txs,
 	}
+
+	block.SetMerkelRoot()
 
 	pow := NewProofOfWork(&block)
 	block.Hash, block.Nonce = pow.Run()
@@ -112,3 +117,8 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 	hash := sha256.Sum256(blockInfo)
 	block.Hash = hash[:]
 }*/
+
+//生成梅克尔根，只是对交易数据作简单处理，不做二叉树处理
+func (block *Block)SetMerkelRoot()  {
+
+}

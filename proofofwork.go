@@ -23,13 +23,13 @@ func NewProofOfWork(block *Block) *ProofOfWork {
 	targetStr := "0000f00000000000000000000000000000000000000000000000000000000000"
 	//转化类型，见demo/big.Int.go文件
 	target := big.Int{}
-	target.SetString(targetStr, 16)//16指的是 指定targetStr是16进制的字符
+	target.SetString(targetStr, 16) //16指的是 指定targetStr是16进制的字符
 	pow.target = &target
 	return &pow
 }
 
 //3. 根据随机数和交易信息找到满足要求的哈希值
-func (pow *ProofOfWork) Run()([]byte, uint64) {
+func (pow *ProofOfWork) Run() ([]byte, uint64) {
 
 	var nonce uint64
 	var hash [32]byte
@@ -43,7 +43,8 @@ func (pow *ProofOfWork) Run()([]byte, uint64) {
 			Uint64ToByte(block.TimeStamp),
 			Uint64ToByte(block.Difficulty),
 			Uint64ToByte(nonce),
-			block.Data,
+			//block.Data,
+			//只对区块头做哈希，区块体通过梅克尔根影响交易ID
 		}
 
 		blockInfo := bytes.Join(tmp, []byte{})
