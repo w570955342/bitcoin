@@ -2,3 +2,5 @@
 blockChain.db
 block
 commandLineTest
+blockChain.db.lock
+bitcoin.exe
