@@ -4,4 +4,5 @@ block.exe
 commandLineTest
 blockChain.db.lock
 bc.exe
-.idea
+.idea/workspace.xml
+workspace.xml
