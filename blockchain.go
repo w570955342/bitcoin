@@ -3,6 +3,7 @@ package main
 import (
 	"bolt"
 	"log"
+	"fmt"
 )
 
 //4. 引入区块链
@@ -93,7 +94,53 @@ func (bc *BlockChain) AddBlock(txs []*Transaction) {
 //找到指定地址的所有UTXO
 func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 	var UTXO []TXOutput
-	//TODO
+	//定义一个map来保存消费过的output，key是这个output的交易id，value是这个交易中索引的切片
+	//map[交易id][]int64
+	spentOutputs := make(map[string][]int64)
+
+	//创建迭代器
+	it := bc.NewIterator()
+
+	for {
+		//1.遍历区块
+		block := it.Next()
+
+		//2. 遍历交易
+		for _, tx := range block.Transactions {
+			fmt.Printf("current TXId : %x\n", tx.TXId)
+
+			//3. 遍历output，找到和自己相关的UTXO(在添加output之前检查一下是否已经消耗过)
+			for i, output := range tx.TXOutputs {
+				fmt.Printf("current index : %d\n", i)
+
+				//这个output和我们目标的地址相同，满足条件，加到返回UTXO数组中
+				if output.PubKeyHash == address {
+					UTXO = append(UTXO, output)
+				}
+			}
+
+			//4. 遍历input，找到自己花费过的UTXO的集合(把自己消耗过的标示出来)
+			for _, input := range tx.TXInputs {
+				//判断一下当前这个input和目标（李四）是否一致，如果相同，说明这个是李四消耗过的output,就加进来
+				if input.Sig == address {
+					//spentOutputs := make(map[string][]int64)
+					//indexSlice := spentOutputs[string(input.Txid)]//定义一个空切片
+					//indexSlice = append(indexSlice, input.Index)
+					spentOutputs[string(input.Txid)]=append(spentOutputs[string(input.Txid)], input.Index)
+					//map[2222] = []int64{0}
+					//map[3333] = []int64{0, 1}
+				//indexSlice 中的index可能会重复，来自不同交易信息
+				}
+			}
+
+		}
+
+		if len(block.PrevHash) == 0 {
+			break
+			fmt.Printf("区块遍历完成退出!")
+		}
+	}
+
 
 	return UTXO
 }
