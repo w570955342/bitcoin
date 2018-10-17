@@ -2,8 +2,8 @@ package main
 
 import (
 	"bolt"
-	"log"
 	"fmt"
+	"log"
 )
 
 //4. 引入区块链
@@ -11,7 +11,7 @@ type BlockChain struct {
 	//定义一个区块链数组
 	//blocks []*Block
 	Db   *bolt.DB //将区块链数据写入数据库
-	Tail []byte  //存储最后一个区块的Hash
+	Tail []byte   //存储最后一个区块的Hash
 }
 
 const BlockChainDb = "blockChain.db"
@@ -42,41 +42,41 @@ func NewBlockChain(address string) *BlockChain {
 			//3. 往bucket写数据
 			bucket.Put(genesisBlock.Hash, genesisBlock.Serialize())
 			bucket.Put([]byte("lastBlockHash"), genesisBlock.Hash)
-			lastBlockHash=genesisBlock.Hash
+			lastBlockHash = genesisBlock.Hash
 
 			//测试数据，测试结束删除
 			//blockBytes:=bucket.Get(genesisBlock.Hash)
 			//block:=Deserialize(blockBytes)
 			//fmt.Printf("刚写入的区块信息%x\n",block.Hash)
 
-		}else {
-			lastBlockHash=bucket.Get([]byte("lastBlockHash"))
+		} else {
+			lastBlockHash = bucket.Get([]byte("lastBlockHash"))
 		}
 		return nil
 
 	})
 
 	return &BlockChain{
-		Db:db,
-		Tail:lastBlockHash,
+		Db:   db,
+		Tail: lastBlockHash,
 	}
 }
 
 //创建一个创世区块
 func GenesisBlock(address string) *Block {
-	GenesisBlockCoinBaseTX:=NewCoinbaseTX(address,"这是一个关于创世区块的故事")
+	GenesisBlockCoinBaseTX := NewCoinbaseTX(address, "这是一个关于创世区块的故事")
 	return NewBlock([]*Transaction{GenesisBlockCoinBaseTX}, []byte{})
 }
 
 //6. 添加区块
 func (bc *BlockChain) AddBlock(txs []*Transaction) {
-	db:=bc.Db
-	lastBlockHash:=bc.Tail//最后一个区块的Hash
+	db := bc.Db
+	lastBlockHash := bc.Tail //最后一个区块的Hash
 
 	db.Update(func(tx *bolt.Tx) error {
 
 		//添加数据
-		bucket:=tx.Bucket([]byte(BlockBucket))
+		bucket := tx.Bucket([]byte(BlockBucket))
 		if bucket == nil {
 			log.Panic("bucket 不应该为空！")
 		}
@@ -86,7 +86,7 @@ func (bc *BlockChain) AddBlock(txs []*Transaction) {
 		bucket.Put(block.Hash, block.Serialize())
 		bucket.Put([]byte("lastBlockHash"), block.Hash)
 		//更新内存中数据
-		bc.Tail=block.Hash
+		bc.Tail = block.Hash
 		return nil
 	})
 }
@@ -108,10 +108,26 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 		//2. 遍历交易
 		for _, tx := range block.Transactions {
 			fmt.Printf("current TXId : %x\n", tx.TXId)
-
-			//3. 遍历output，找到和自己相关的UTXO(在添加output之前检查一下是否已经消耗过)
+		lable:
+			//3. 遍历 TXOutputs，找到和自己相关的UTXO(在添加output之前检查一下是否已经消耗过)
 			for i, output := range tx.TXOutputs {
 				fmt.Printf("current index : %d\n", i)
+
+				//在这里做一个过滤，将所有消耗过的outputs和当前的所即将添加output对比一下
+				//如果相同，则跳过，否则添加
+				//如果当前的交易id存在于我们已经表示的map，那么说明这个交易里面有消耗过的output
+
+				//map[2222] = []int64{0}
+				//map[3333] = []int64{0, 1}
+				if spentOutputs[string(tx.TXId)] != nil {
+					for _, j := range spentOutputs[string(tx.TXId)] {
+						//[]int64{0, 1} , j : 0, 1
+						if int64(i) == j {
+							//当前准备添加output已经消耗过了，不要再加了
+							goto lable
+						}
+					}
+				}
 
 				//这个output和我们目标的地址相同，满足条件，加到返回UTXO数组中
 				if output.PubKeyHash == address {
@@ -119,17 +135,17 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 				}
 			}
 
-			//4. 遍历input，找到自己花费过的UTXO的集合(把自己消耗过的标示出来)
+			//4. 遍历 TXInputs，找到自己花费过的UTXO的集合(把自己消耗过的标示出来)
 			for _, input := range tx.TXInputs {
 				//判断一下当前这个input和目标（李四）是否一致，如果相同，说明这个是李四消耗过的output,就加进来
 				if input.Sig == address {
 					//spentOutputs := make(map[string][]int64)
 					//indexSlice := spentOutputs[string(input.Txid)]//定义一个空切片
 					//indexSlice = append(indexSlice, input.Index)
-					spentOutputs[string(input.Txid)]=append(spentOutputs[string(input.Txid)], input.Index)
+					spentOutputs[string(input.Txid)] = append(spentOutputs[string(input.Txid)], input.Index)
 					//map[2222] = []int64{0}
 					//map[3333] = []int64{0, 1}
-				//indexSlice 中的index可能会重复，来自不同交易信息
+					//indexSlice 中的index可能会重复，来自不同交易信息
 				}
 			}
 
@@ -140,7 +156,6 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 			fmt.Printf("区块遍历完成退出!")
 		}
 	}
-
 
 	return UTXO
 }
