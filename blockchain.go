@@ -89,3 +89,11 @@ func (bc *BlockChain) AddBlock(txs []*Transaction) {
 		return nil
 	})
 }
+
+//找到指定地址的所有UTXO
+func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
+	var UTXO []TXOutput
+	//TODO
+
+	return UTXO
+}
