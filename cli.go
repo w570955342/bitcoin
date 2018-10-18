@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"fmt"
+	"golang.org/x/crypto/ripemd160"
 )
 
 //这是一个用来接收命令行参数并且控制区块链操作的文件
@@ -29,7 +30,7 @@ func (cli *CLI) Run() {
 		fmt.Printf(Usage)
 		return
 	}
-
+ripemd160.New()
 	//2. 分析命令
 	cmd := args[1]
 	switch cmd {

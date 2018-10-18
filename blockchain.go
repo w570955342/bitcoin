@@ -135,20 +135,24 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 				}
 			}
 
-			//4. 遍历 TXInputs，找到自己花费过的UTXO的集合(把自己消耗过的标示出来)
-			for _, input := range tx.TXInputs {
-				//判断一下当前这个input和目标（李四）是否一致，如果相同，说明这个是李四消耗过的output,就加进来
-				if input.Sig == address {
-					//spentOutputs := make(map[string][]int64)
-					//indexSlice := spentOutputs[string(input.Txid)]//定义一个空切片
-					//indexSlice = append(indexSlice, input.Index)
-					spentOutputs[string(input.Txid)] = append(spentOutputs[string(input.Txid)], input.Index)
-					//map[2222] = []int64{0}
-					//map[3333] = []int64{0, 1}
-					//indexSlice 中的index可能会重复，来自不同交易信息
+			//如果当期交易是挖矿交易，input个数为0，直接跳过
+			if tx.IsCoinbaseTX() {
+				//4. 遍历 TXInputs，找到自己花费过的UTXO的集合(把自己消耗过的标示出来)
+				for _, input := range tx.TXInputs {
+					//判断一下当前这个input和目标（李四）是否一致，如果相同，说明这个是李四消耗过的output,就加进来
+					if input.Sig == address {
+						//spentOutputs := make(map[string][]int64)
+						//indexSlice := spentOutputs[string(input.Txid)]//定义一个空切片
+						//indexSlice = append(indexSlice, input.Index)
+						spentOutputs[string(input.Txid)] = append(spentOutputs[string(input.Txid)], input.Index)
+						//map[2222] = []int64{0}
+						//map[3333] = []int64{0, 1}
+						//indexSlice 中的index可能会重复，来自不同交易信息
+					}
 				}
+			}else {
+				fmt.Println("这是CoinbaseTX，不做TXInputs遍历！")
 			}
-
 		}
 
 		if len(block.PrevHash) == 0 {

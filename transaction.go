@@ -59,5 +59,20 @@ func NewCoinbaseTX(address, data string) *Transaction {
 	return &tx
 }
 
+//为交易绑定方法，判断该交易是否为挖矿交易
+func (tx *Transaction)IsCoinbaseTX()bool  {
+	//1. 只有一个input
+	if len(tx.TXInputs)==1 {
+		input:=tx.TXInputs[0]
+		//2. 无需引用交易id 表名是挖矿交易
+		//3. 无需引用index 设置为-1 任意设置的
+		if len(input.Txid) == 0 && input.Index == -1 {
+			return true
+		}
+	}
+	return false
+}
+
+
 //3. 创建挖矿交易
 //4. 根据交易调整数据

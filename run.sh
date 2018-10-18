@@ -1,4 +1,5 @@
 #!/bin/bash
-rm bc.exe
+rm block
 rm *.db
-go build -o bc.exe
+go build -o block
+./block
