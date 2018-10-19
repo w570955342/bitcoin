@@ -124,7 +124,7 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 						//[]int64{0, 1} , j : 0, 1
 						if int64(i) == j {
 							//当前准备添加output已经消耗过了，不要再加了
-							goto lable
+							continue lable
 						}
 					}
 				}
@@ -136,7 +136,7 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 			}
 
 			//如果当期交易是挖矿交易，input个数为0，直接跳过
-			if tx.IsCoinbaseTX() {
+			if !tx.IsCoinbaseTX() {
 				//4. 遍历 TXInputs，找到自己花费过的UTXO的集合(把自己消耗过的标示出来)
 				for _, input := range tx.TXInputs {
 					//判断一下当前这个input和目标（李四）是否一致，如果相同，说明这个是李四消耗过的output,就加进来
@@ -201,7 +201,7 @@ func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]
 						//[]int64{0, 1} , j : 0, 1
 						if int64(i) == j {
 							//当前准备添加output已经消耗过了，不要再加了
-							goto lable
+							continue lable
 						}
 					}
 				}
@@ -222,7 +222,7 @@ func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]
 			}
 
 			//如果当期交易是挖矿交易，input个数为0，直接跳过
-			if tx.IsCoinbaseTX() {
+			if !tx.IsCoinbaseTX() {
 				//4. 遍历 TXInputs，找到自己花费过的UTXO的集合(把自己消耗过的标示出来)
 				for _, input := range tx.TXInputs {
 					//判断一下当前这个input和目标（李四）是否一致，如果相同，说明这个是李四消耗过的output,就加进来
