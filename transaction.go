@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-const reward = 10.0
+const reward = 50.0
 
 //1. 交易结构
 type Transaction struct {
@@ -79,7 +79,7 @@ func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction
 	//1. 找到足够UTXO
 	utxos, totalMoney := bc.FindEnoughUTXO(from, amount)
 	if totalMoney < amount {
-		fmt.Printf("只有%f比特币，余额不足，交易失败！",totalMoney)
+		fmt.Printf("\"%s\"只有 %f 比特币，余额不足，交易失败！",from,totalMoney)
 		return nil
 	}
 

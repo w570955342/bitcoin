@@ -184,7 +184,7 @@ func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]
 
 		//2. 遍历交易
 		for _, tx := range block.Transactions {
-			fmt.Printf("current TXId : %x\n", tx.TXId)
+			//fmt.Printf("current TXId : %x\n", tx.TXId)
 		lable:
 			//3. 遍历 TXOutputs，找到和自己相关的UTXO(在添加output之前检查一下是否已经消耗过)
 			for i, output := range tx.TXOutputs {

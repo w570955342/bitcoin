@@ -13,9 +13,10 @@ type CLI struct {
 }
 
 const Usage = `
-	printChain               "print all blockchain data" 
-	getBalance --address ADDRESS "获取指定地址ADDRESS的余额"
-	send FROM TO AMOUNT MINER DATA "由FROM转AMOUNT给TO，由MINER挖矿，同时写入DATA"
+	printChain			"print all blockchain data" 
+	getBalance --address ADDRESS	"获取指定地址ADDRESS的余额"
+	send FROM TO AMOUNT MINER DATA	"由FROM转AMOUNT给TO，由MINER挖矿，同时写入DATA"
+	newKey				"创建一个新的钱包(私钥公钥对)"
 `
 
 //接受参数的动作，我们放到一个函数中
@@ -57,6 +58,9 @@ func (cli *CLI) Run() {
 		miner := args[5]
 		data := args[6]
 		cli.Send(from, to, amount, miner, data)
+	case "newKey":
+		fmt.Printf("创建新的秘钥...\n")
+		cli.NewKey()
 	default:
 		fmt.Printf("无效的命令，请检查!\n")
 		fmt.Printf(Usage)

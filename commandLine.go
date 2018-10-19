@@ -63,3 +63,9 @@ func (cli *CLI) Send(from, to string, amount float64, miner, data string) {
 	cli.bc.AddBlock([]*Transaction{coinbaseTX,ordinaryTX})
 	fmt.Printf("\"%s\"成功转给\"%s\" %f 比特币\n",from,to,amount)
 }
+
+func (cli *CLI)NewKey()  {
+	key := NewKey()
+	fmt.Printf("私钥：%v\n", key.Private)
+	fmt.Printf("公钥：%v\n", key.PubKey)
+}
