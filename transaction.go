@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
+	"fmt"
 	"log"
 )
 
-const reward = 12.5
+const reward = 10.0
 
 //1. 交易结构
 type Transaction struct {
@@ -42,7 +43,7 @@ func (tx *Transaction) SetHash() {
 	tx.TXId = hash[:]
 }
 
-//2. 交易方法
+//2. 生成一笔挖矿交易
 func NewCoinbaseTX(address, data string) *Transaction {
 	//挖矿交易的特点：
 	//1. 只有一个input
@@ -53,11 +54,57 @@ func NewCoinbaseTX(address, data string) *Transaction {
 	output := TXOutput{reward, address}
 
 	//对于挖矿交易来说，只有一个input和一个output
-	tx:=Transaction{[]byte{},[]TXInput{input},[]TXOutput{output}}
+	tx := Transaction{[]byte{}, []TXInput{input}, []TXOutput{output}}
 	//计算交易ID
 	tx.SetHash()
 	return &tx
 }
 
-//3. 创建挖矿交易
-//4. 根据交易调整数据
+//为交易绑定方法，判断该交易是否为挖矿交易
+func (tx *Transaction) IsCoinbaseTX() bool {
+	//1. 只有一个input
+	if len(tx.TXInputs) == 1 {
+		input := tx.TXInputs[0]
+		//2. 无需引用交易id 表名是挖矿交易
+		//3. 无需引用index 设置为-1 任意设置的
+		if len(input.Txid) == 0 && input.Index == -1 {
+			return true
+		}
+	}
+	return false
+}
+
+//3. 生成一笔普通交易（找零）
+func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction {
+	//1. 找到足够UTXO
+	utxos, totalMoney := bc.FindEnoughUTXO(from, amount)
+	if totalMoney < amount {
+		fmt.Printf("只有%f比特币，余额不足，交易失败！",totalMoney)
+		return nil
+	}
+
+	//2. 创建交易输入，将UTXO逐一转成对应的input
+	//map[string][]uint64
+	var inputs []TXInput
+	var outputs []TXOutput
+	for TXid, indexSlice := range utxos {
+		for _, i := range indexSlice {
+			input := TXInput{[]byte(TXid), int64(i), from}
+			inputs = append(inputs, input)
+		}
+	}
+
+	//3. 创建交易输出
+	output:=TXOutput{amount,to}
+	outputs=append(outputs,output)
+
+	//4. 找零
+	if totalMoney>amount {
+		outputs=append(outputs,TXOutput{totalMoney-amount,from})
+	}
+
+	//5. 生成交易
+	tx:=Transaction{[]byte{},inputs,outputs}
+	tx.SetHash()
+	return &tx
+}
