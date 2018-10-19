@@ -66,6 +66,8 @@ func (cli *CLI) Send(from, to string, amount float64, miner, data string) {
 
 func (cli *CLI)NewKey()  {
 	key := NewKey()
+	address:=key.NewAddress()
 	fmt.Printf("私钥：%v\n", key.Private)
 	fmt.Printf("公钥：%v\n", key.PubKey)
+	fmt.Printf("地址：%v\n", address)
 }
