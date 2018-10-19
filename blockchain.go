@@ -156,7 +156,7 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 		}
 
 		if len(block.PrevHash) == 0 {
-			fmt.Printf("区块遍历完成退出!\n")
+			//fmt.Printf("区块遍历完成退出!\n")
 			break
 		}
 	}
@@ -188,7 +188,7 @@ func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]
 		lable:
 			//3. 遍历 TXOutputs，找到和自己相关的UTXO(在添加output之前检查一下是否已经消耗过)
 			for i, output := range tx.TXOutputs {
-				fmt.Printf("current index : %d\n", i)
+				//fmt.Printf("current index : %d\n", i)
 
 				//在这里做一个过滤，将所有消耗过的outputs和当前的所即将添加output对比一下
 				//如果相同，则跳过，否则添加
@@ -237,13 +237,13 @@ func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]
 					}
 				}
 			} else {
-				fmt.Println("这是CoinbaseTX，不做TXInputs遍历！")
+				//fmt.Println("这是CoinbaseTX，不做TXInputs遍历！")
 			}
 		}
 
 		if len(block.PrevHash) == 0 {
 			break
-			fmt.Printf("区块遍历完成退出!")
+			//fmt.Printf("区块遍历完成退出!")
 		}
 	}
 	return utxos, totalMoney

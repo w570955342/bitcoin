@@ -79,7 +79,7 @@ func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction
 	//1. 找到足够UTXO
 	utxos, totalMoney := bc.FindEnoughUTXO(from, amount)
 	if totalMoney < amount {
-		fmt.Println("余额不足，交易失败！")
+		fmt.Printf("只有%f比特币，余额不足，交易失败！",totalMoney)
 		return nil
 	}
 

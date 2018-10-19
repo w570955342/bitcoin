@@ -6,6 +6,8 @@ import (
 	"encoding/gob"
 	"log"
 	"time"
+	"crypto/sha256"
+	"fmt"
 )
 
 //1. 定义区块结构
@@ -68,6 +70,7 @@ func Uint64ToByte(num uint64) []byte {
 
 //2. 创建区块
 func NewBlock(txs []*Transaction, prevBlockHash []byte) *Block {
+	fmt.Println("正在挖矿...")
 	block := Block{
 		Version:    00,
 		PrevHash:   prevBlockHash,
@@ -75,7 +78,7 @@ func NewBlock(txs []*Transaction, prevBlockHash []byte) *Block {
 		TimeStamp:  uint64(time.Now().Unix()),
 		Difficulty: 0,
 		Nonce:      0,
-		Hash:       []byte{}, //先填空，后面再计算 //TODO
+		Hash:       []byte{},
 		//Data:       []byte(data),
 		Transactions:txs,
 	}
@@ -120,5 +123,11 @@ func NewBlock(txs []*Transaction, prevBlockHash []byte) *Block {
 
 //生成梅克尔根，只是对交易数据作简单处理，不做二叉树处理
 func (block *Block)SetMerkelRoot()  {
-
+	var info []byte
+	for _, tx := range block.Transactions {
+		//将交易的交易ID拼接起来，再整体做哈希处理
+		info = append(info, tx.TXId...)
+	}
+	hash := sha256.Sum256(info)
+	block.MerkelRoot=hash[:]
 }
