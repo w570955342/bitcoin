@@ -71,3 +71,11 @@ func (cli *CLI)NewKey()  {
 	fmt.Printf("公钥：%v\n", key.PubKey)
 	fmt.Printf("地址：%v\n", address)
 }
+
+func (cli *CLI)NewWallet()  {
+	wallet:=NewWallet()
+	for address:=range wallet.WalletsMap{
+		fmt.Printf("地址：%v\n", address)
+	}
+
+}

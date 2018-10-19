@@ -16,7 +16,8 @@ const Usage = `
 	printChain			"print all blockchain data" 
 	getBalance --address ADDRESS	"获取指定地址ADDRESS的余额"
 	send FROM TO AMOUNT MINER DATA	"由FROM转AMOUNT给TO，由MINER挖矿，同时写入DATA"
-	newKey				"创建一个新的钱包(私钥公钥对)"
+	newKey				"单独创建一个密钥对"
+	newWallet			"创建一个新的钱包(私钥公钥对)"
 `
 
 //接受参数的动作，我们放到一个函数中
@@ -61,6 +62,9 @@ func (cli *CLI) Run() {
 	case "newKey":
 		fmt.Printf("创建新的秘钥...\n")
 		cli.NewKey()
+	case "newWallet":
+		fmt.Printf("创建新的钱包...\n")
+		cli.NewWallet()
 	default:
 		fmt.Printf("无效的命令，请检查!\n")
 		fmt.Printf(Usage)
