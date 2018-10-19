@@ -107,11 +107,11 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 
 		//2. 遍历交易
 		for _, tx := range block.Transactions {
-			fmt.Printf("current TXId : %x\n", tx.TXId)
+			//fmt.Printf("current TXId : %x\n", tx.TXId)
 		lable:
 			//3. 遍历 TXOutputs，找到和自己相关的UTXO(在添加output之前检查一下是否已经消耗过)
 			for i, output := range tx.TXOutputs {
-				fmt.Printf("current index : %d\n", i)
+				//fmt.Printf("current index : %d\n", i)
 
 				//在这里做一个过滤，将所有消耗过的outputs和当前的所即将添加output对比一下
 				//如果相同，则跳过，否则添加
@@ -151,13 +151,13 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 					}
 				}
 			} else {
-				fmt.Println("这是CoinbaseTX，不做TXInputs遍历！")
+				//fmt.Println("这是CoinbaseTX，不做TXInputs遍历！")
 			}
 		}
 
 		if len(block.PrevHash) == 0 {
+			fmt.Printf("区块遍历完成退出!\n")
 			break
-			fmt.Printf("区块遍历完成退出!")
 		}
 	}
 
@@ -169,7 +169,8 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]uint64, float64) {
 
 	//找到足够的UTXO
-	var utxos map[string][]uint64
+	//var utxos map[string][]uint64//错误panic: assignment to entry in nil map，必须初始化空间才能用
+	utxos:=make(map[string][]uint64)
 	//UTXO里钱的总数
 	var totalMoney float64
 	//定义一个map来保存消费过的output，key是这个output的交易id，value是这个交易中索引的切片

@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-const reward = 12.5
+const reward = 10.0
 
 //1. 交易结构
 type Transaction struct {
