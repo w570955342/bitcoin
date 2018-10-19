@@ -16,7 +16,7 @@ const Usage = `
 	printChain			"print all blockchain data" 
 	getBalance --address ADDRESS	"获取指定地址ADDRESS的余额"
 	send FROM TO AMOUNT MINER DATA	"由FROM转AMOUNT给TO，由MINER挖矿，同时写入DATA"
-	newKey				"单独创建一个密钥对"
+	newKey				"ecdsa P256单独创建一个密钥对"
 	newWallet			"创建一个新的钱包(私钥公钥对)"
 `
 
@@ -60,7 +60,7 @@ func (cli *CLI) Run() {
 		data := args[6]
 		cli.Send(from, to, amount, miner, data)
 	case "newKey":
-		fmt.Printf("创建新的秘钥...\n")
+		fmt.Printf("ecdsa P256创建新的秘钥对...\n")
 		cli.NewKey()
 	case "newWallet":
 		fmt.Printf("创建新的钱包...\n")

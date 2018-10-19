@@ -6,3 +6,4 @@ blockChain.db.lock
 bc.exe
 .idea/workspace.xml
 block
+wallet.dat
