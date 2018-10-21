@@ -7,6 +7,7 @@ import (
 	"log"
 	"crypto/elliptic"
 	"os"
+	"fmt"
 )
 
 const walletFile  = "wallet.dat"
@@ -54,7 +55,8 @@ func (wallet *Wallet)loadFile()  {
 	//在读取之前，要先确认文件是否在，如果不存在，直接退出
 	_, err := os.Stat(walletFile)
 	if os.IsNotExist(err) {
-		//ws.WalletsMap = make(map[string]*Wallet)
+		//wallet.WalletMap[address]=key
+		fmt.Println("wallet.dat文件不存在！不存在地址！")
 		return
 	}
 	content, err := ioutil.ReadFile(walletFile)

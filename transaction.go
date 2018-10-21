@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"log"
+	"github.com/btcsuite/btcutil/base58"
 )
 
 const reward = 50.0
@@ -21,14 +22,48 @@ type Transaction struct {
 type TXInput struct {
 	Txid  []byte //预消费的UTXO所在交易的交易ID，肯定不是当前交易的交易ID，至少是上一笔或者更早交易
 	Index int64  //预消费的UTXO在自己的交易中的索引
-	Sig   string //解锁脚本，用地址模拟
+	//Sig   string //解锁脚本，用地址模拟
+
+	Signature []byte //真正的数字签名，由r，s拼成的[]byte
+
+	//约定，这里的PubKey不存储原始的公钥，而是存储X和Y拼接的字符串，在校验端重新拆分（参考r,s传递）
+	//注意，是公钥，不是哈希，也不是地址
+	PubKey []byte
 }
+
 
 //交易输出，钱的去向
 type TXOutput struct {
-	Value      float64 //转账金额
-	PubKeyHash string  //所定脚本，用地址模拟
+	Value float64 //转账金额
+	//PubKeyHash string  //所定脚本，用地址模拟
+
+	PubKeyHash []byte //收款方的公钥的哈希，注意，是哈希而不是公钥，也不是地址
 }
+
+//TXOutput存储的字段是地址对应的的公钥哈希，需要由地址反推出公钥哈希，然后创建TXOutput
+//为了能够得到公钥哈希，为TXOutput绑定一个方法
+func (output *TXOutput) SetPubKeyHash(address string) {
+	//1. 解码
+	//2. 截取出公钥哈希：去除version（1字节），去除校验码（4字节）
+	addressByte := base58.Decode(address) //25字节
+	len := len(addressByte)
+
+	pubKeyHash := addressByte[1:len-4]
+
+	//真正的锁定动作！！！！！
+	output.PubKeyHash = pubKeyHash
+}
+
+//给TXOutput提供一个创建的方法，否则无法调用SetPubKeyHash方法
+func NewTXOutput(value float64, address string) *TXOutput {
+	output := TXOutput{
+		Value: value,
+	}
+
+	output.SetPubKeyHash(address)
+	return &output
+}
+
 
 //设置交易ID
 func (tx *Transaction) SetHash() {
@@ -79,7 +114,7 @@ func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction
 	//1. 找到足够UTXO
 	utxos, totalMoney := bc.FindEnoughUTXO(from, amount)
 	if totalMoney < amount {
-		fmt.Printf("\"%s\"只有 %f 比特币，余额不足，交易失败！",from,totalMoney)
+		fmt.Printf("\"%s\"只有 %f 比特币，余额不足，交易失败！", from, totalMoney)
 		return nil
 	}
 
@@ -95,16 +130,16 @@ func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction
 	}
 
 	//3. 创建交易输出
-	output:=TXOutput{amount,to}
-	outputs=append(outputs,output)
+	output := TXOutput{amount, to}
+	outputs = append(outputs, output)
 
 	//4. 找零
-	if totalMoney>amount {
-		outputs=append(outputs,TXOutput{totalMoney-amount,from})
+	if totalMoney > amount {
+		outputs = append(outputs, TXOutput{totalMoney - amount, from})
 	}
 
 	//5. 生成交易
-	tx:=Transaction{[]byte{},inputs,outputs}
+	tx := Transaction{[]byte{}, inputs, outputs}
 	tx.SetHash()
 	return &tx
 }
