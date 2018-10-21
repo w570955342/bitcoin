@@ -249,9 +249,10 @@ func (tx Transaction) String() string {
 //我们要对每一个签名过得input进行校验
 
 func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
-	if tx.IsCoinbaseTX() {
-		return true
-	}
+	//保证上一级调用函数不是挖矿交易即可
+	//if tx.IsCoinbaseTX() {
+	//	return true
+	//}
 
 	//1. 得到签名的数据
 	txCopy := tx.TrimmedCopy()
