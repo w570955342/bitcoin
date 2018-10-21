@@ -33,8 +33,11 @@ func (cli *CLI) PrinBlockChain() {
 
 func (cli *CLI) GetBalance(address string) {
 
-	//1. 校验地址，稍后在做
-	//TODO
+	//1. 校验地址
+	if !IsValidAddress(address) {
+		fmt.Printf("地址\"%s\"无效，请核实该地址！",address)
+		return
+	}
 	//2. 生成公钥哈希
 	pubKeyHash := GetPubKeyHashFromAddress(address)
 	utxos := cli.bc.FindUTXOs(pubKeyHash)
