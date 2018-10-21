@@ -38,16 +38,16 @@ func (cli *CLI) Run() {
 	cmd := args[1]
 	switch cmd {
 	case "printChain":
-		fmt.Printf("打印区块...\n")
+		fmt.Printf("\n打印区块...\n")
 		cli.PrinBlockChain()
 	case "getBalance":
-		fmt.Printf("获取余额...\n")
+		fmt.Printf("\n获取余额...\n")
 		if len(args) == 4 && args[2] == "--address" {
 			address := args[3]
 			cli.GetBalance(address)
 		}
 	case "send":
-		fmt.Printf("转账开始...\n")
+		fmt.Printf("\n转账开始...\n")
 		if len(args) != 7 {
 			fmt.Printf("参数个数错误，请检查！\n")
 			fmt.Printf(Usage)
@@ -61,10 +61,10 @@ func (cli *CLI) Run() {
 		data := args[6]
 		cli.Send(from, to, amount, miner, data)
 	case "newKey":
-		fmt.Printf("ecdsa P256创建新的秘钥对...\n")
+		fmt.Printf("\necdsa P256创建新的秘钥对...\n")
 		cli.NewKey()
 	case "newWallet":
-		fmt.Printf("创建新的钱包...\n")
+		fmt.Printf("\n创建新的钱包...\n")
 		cli.NewWallet()
 	case "listAddresses":
 		//在读取之前，要先确认文件是否在，如果不存在，直接退出

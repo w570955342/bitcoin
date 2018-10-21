@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 func (cli *CLI) PrinBlockChain() {
@@ -11,18 +10,23 @@ func (cli *CLI) PrinBlockChain() {
 	it := bc.NewIterator()
 
 	//通过迭代器返回数据库中的区块
-	for {
+	for i:=0;;i++ {
+		//返回区块，左移
 		block := it.Next()
-		fmt.Println("===================================================================")
-		fmt.Printf("版本号: %d\n", block.Version)
-		fmt.Printf("前区块哈希值: %x\n", block.PrevHash)
-		fmt.Printf("梅克尔根: %x\n", block.MerkelRoot)
-		timeFormat := time.Unix(int64(block.TimeStamp), 0).Format("2006-01-02 15:04:05")
-		fmt.Printf("时间戳: %s\n", timeFormat)
-		fmt.Printf("难度值(随便写的）: %d\n", block.Difficulty)
-		fmt.Printf("随机数 : %d\n", block.Nonce)
-		fmt.Printf("当前区块哈希值: %x\n", block.Hash)
-		fmt.Printf("区块数据 :%s\n", block.Transactions[0].TXInputs[0].PubKey)
+
+		fmt.Printf("========================区块高度：%d=========================\n",i)
+		for _, tx := range block.Transactions {
+			fmt.Println(tx)
+		}
+		//fmt.Printf("版本号: %d\n", block.Version)
+		//fmt.Printf("前区块哈希值: %x\n", block.PrevHash)
+		//fmt.Printf("梅克尔根: %x\n", block.MerkelRoot)
+		//timeFormat := time.Unix(int64(block.TimeStamp), 0).Format("2006-01-02 15:04:05")
+		//fmt.Printf("时间戳: %s\n", timeFormat)
+		//fmt.Printf("难度值(随便写的）: %d\n", block.Difficulty)
+		//fmt.Printf("随机数 : %d\n", block.Nonce)
+		//fmt.Printf("当前区块哈希值: %x\n", block.Hash)
+		//fmt.Printf("区块数据 :%s\n", block.Transactions[0].TXInputs[0].PubKey)
 
 		if len(block.PrevHash) == 0 {
 			fmt.Println("区块链遍历结束！")
