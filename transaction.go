@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"log"
 	"crypto/ecdsa"
-	"errors"
 )
 
 const reward = 50.0
@@ -167,31 +166,16 @@ func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction
 	tx.SetHash()
 
 	//6. 签名
-	prevTXs:=make(map[string]Transaction)
-
-	//找到所有引用的交易
-	//a. 根据当前交易的input来找，有多少个input，就寻找多少次
-	//b. 根据每一个input中的字段TXId，找到引用的交易
-	//c. 把找到的交易添加到prevTXs中
-	for _,input:=range tx.TXInputs{
-		prevTX,_:=FindTransactionByTxid(input.Txid)
-		prevTXs[string(input.Txid)]=prevTX
-	}
-
-	tx.Sign(*privateKey,prevTXs)
+	bc.SignTransaction(&tx,privateKey)
 	return &tx
 }
 
 //为普通交易绑定Sign方法
 //参数为：私钥，inputs里面引用的所有的交易实体 map[string]Transaction
 //map[交易ID]Transaction
-func (tx *Transaction) Sign(privateKey ecdsa.PrivateKey, prevTXs map[string]Transaction) {
+func (tx *Transaction) Sign(privateKey *ecdsa.PrivateKey, prevTXs map[string]Transaction) {
 	//具体签名功能
 	//TODO
 }
 
-//根据交易ID查找交易本身，需要遍历整个区块链
-func FindTransactionByTxid(Txid []byte) (Transaction,error) {
-	return Transaction{},errors.New("无效的交易ID，请核实！")
-}
 
