@@ -9,6 +9,8 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 	"strings"
+	"math/big"
+	"crypto/elliptic"
 )
 
 const reward = 50.0
@@ -239,4 +241,59 @@ func (tx Transaction) String() string {
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+
+//分析校验：
+//所需要的数据：公钥，数据(txCopy，生成哈希), 签名
+//我们要对每一个签名过得input进行校验
+
+func (tx *Transaction) Verify(prevTXs map[string]Transaction) bool {
+	if tx.IsCoinbaseTX() {
+		return true
+	}
+
+	//1. 得到签名的数据
+	txCopy := tx.TrimmedCopy()
+
+	for i, input := range tx.TXInputs {
+		prevTX := prevTXs[string(input.Txid)]
+		if len(prevTX.TXId) == 0 {
+			log.Panic("引用的交易无效")
+		}
+
+		txCopy.TXInputs[i].PubKey = prevTX.TXOutputs[input.Index].PubKeyHash
+		txCopy.SetHash()
+		dataHash := txCopy.TXId
+		//2. 得到Signature, 反推会r,s
+		signature := input.Signature //拆，r,s
+
+		//a. 定义两个辅助的big.int
+		r := big.Int{}
+		s := big.Int{}
+
+		//b. 拆分我们signature，平均分，前半部分给r, 后半部分给s
+		r.SetBytes(signature[:len(signature)/2 ])
+		s.SetBytes(signature[len(signature)/2:])
+
+		//3. 拆解PubKey, X, Y 得到原生公钥
+		pubKey := input.PubKey //拆，X, Y
+
+		//a. 定义两个辅助的big.int
+		X := big.Int{}
+		Y := big.Int{}
+
+		//b. pubKey，平均分，前半部分给X, 后半部分给Y
+		X.SetBytes(pubKey[:len(pubKey)/2 ])
+		Y.SetBytes(pubKey[len(pubKey)/2:])
+
+		pubKeyOrigin := ecdsa.PublicKey{elliptic.P256(), &X, &Y}
+
+		//4. Verify
+		if !ecdsa.Verify(&pubKeyOrigin, dataHash, &r, &s) {
+			return false
+		}
+	}
+
+	return true
 }
