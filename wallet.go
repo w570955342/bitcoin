@@ -7,6 +7,7 @@ import (
 	"log"
 	"crypto/elliptic"
 	"os"
+	"github.com/btcsuite/btcutil/base58"
 )
 
 const walletFile  = "wallet.dat"
@@ -87,4 +88,17 @@ func (wallet *Wallet) ListAllAddresses() []string {
 	}
 
 	return addresses
+}
+
+
+//通过地址返回公钥的哈希值
+func GetPubKeyHashFromAddress(address string) []byte {
+	//1. 解码
+	//2. 截取出公钥哈希：去除version（1字节），去除校验码（4字节）
+	addressByte := base58.Decode(address) //25字节
+	lens := len(addressByte)
+
+	pubKeyHash := addressByte[1:lens-4]
+
+	return pubKeyHash
 }

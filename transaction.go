@@ -6,7 +6,6 @@ import (
 	"encoding/gob"
 	"fmt"
 	"log"
-	"github.com/btcsuite/btcutil/base58"
 )
 
 const reward = 50.0
@@ -43,15 +42,15 @@ type TXOutput struct {
 //TXOutput存储的字段是地址对应的的公钥哈希，需要由地址反推出公钥哈希，然后创建TXOutput
 //为了能够得到公钥哈希，为TXOutput绑定一个方法
 func (output *TXOutput) SetPubKeyHash(address string) {
-	//1. 解码
-	//2. 截取出公钥哈希：去除version（1字节），去除校验码（4字节）
-	addressByte := base58.Decode(address) //25字节
-	len := len(addressByte)
-
-	pubKeyHash := addressByte[1:len-4]
+	////1. 解码
+	////2. 截取出公钥哈希：去除version（1字节），去除校验码（4字节）
+	//addressByte := base58.Decode(address) //25字节
+	//len := len(addressByte)
+	//
+	//pubKeyHash := addressByte[1:len-4]
 
 	//真正的锁定动作！！！！！
-	output.PubKeyHash = pubKeyHash
+	output.PubKeyHash = GetPubKeyHashFromAddress(address)
 }
 
 //给TXOutput提供一个创建的方法，否则无法调用SetPubKeyHash方法
