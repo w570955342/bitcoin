@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"crypto/ecdsa"
+	"crypto/rand"
 )
 
 const reward = 50.0
@@ -174,16 +175,37 @@ func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction
 //参数为：私钥，inputs里面引用的所有的交易实体 map[string]Transaction
 //map[交易ID]Transaction
 func (tx *Transaction) Sign(privateKey *ecdsa.PrivateKey, prevTXs map[string]Transaction) {
-	//具体签名功能
-	//1. 创建一个当前交易的副本：txCopy，使用函数： TrimmedCopy：要把Signature和PubKey字段设置为nil
+	//1. 创建一个当前交易的副本：txCopy，使用方法： TrimmedCopy：要把Signature和PubKey字段设置为nil
 	txCopy := tx.TrimmedCopy()
 	//2. 循环遍历txCopy的inputs，得到这个input索引的output的公钥哈希
-	//3. 生成要签名的数据。要签名的数据一定是哈希值
-	//a. 我们对每一个input都要签名一次，签名的数据是由当前input引用的output的哈希+当前的outputs（都承载在当前这个txCopy里面）
-	//b. 要对这个拼好的txCopy进行哈希处理，SetHash得到TXID，这个TXID就是我们要签名最终数据。
-	//4. 执行签名动作得到r,s字节流
-	//5. 放到我们所签名的input的Signature中
+	for i, input := range txCopy.TXInputs {
+		prevTX := prevTXs[string(input.Txid)]
+		if len(prevTX.TXId) == 0 {
+			log.Panic("引用的交易无效")
+		}
 
+		//不要对input进行赋值，这是一个副本，为了找到公钥哈希，要对txCopy.TXInputs[xx]进行操作，否则无法把pubKeyHash传进txCopy.TXInputs[xx]
+		txCopy.TXInputs[i].PubKey = prevTX.TXOutputs[input.Index].PubKeyHash
+
+		//所需要的三个数据都具备了，开始做哈希处理
+		//3. 生成要签名的数据。要签名的数据一定是哈希值
+		//a. 我们对每一个input都要签名一次，签名的数据是由当前input引用的output的哈希+当前的outputs（都承载在当前这个txCopy里面）
+		//b. 要对这个拼好的txCopy进行哈希处理，SetHash得到TXID，这个TXID就是我们要签名最终数据。
+		txCopy.SetHash()
+
+		//还原，以免影响后面input的签名
+		txCopy.TXInputs[i].PubKey = nil
+		signDataHash := txCopy.TXId
+		//4. 执行签名动作得到r,s字节流
+		r, s, err := ecdsa.Sign(rand.Reader, privateKey, signDataHash)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		//5. 放到我们所签名的input的Signature中
+		signature := append(r.Bytes(), s.Bytes()...)
+		tx.TXInputs[i].Signature = signature
+	}
 }
 
 func (tx *Transaction) TrimmedCopy() Transaction {
