@@ -6,6 +6,7 @@ import (
 	"encoding/gob"
 	"fmt"
 	"log"
+	"crypto/ecdsa"
 )
 
 const reward = 50.0
@@ -126,7 +127,7 @@ func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction
 
 	//c. 得到对应的公钥，私钥
 	pubKey := key.PubKey
-	//privateKey := key.Private  //稍后再用
+	privateKey := key.Private  //稍后再用
 
 	//传递公钥的哈希，而不是传递地址
 	pubKeyHash := HashPubKey(pubKey)
@@ -163,5 +164,18 @@ func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction
 	//5. 生成交易
 	tx := Transaction{[]byte{}, inputs, outputs}
 	tx.SetHash()
+
+	//6. 签名
+	prevTXs:=make(map[string]Transaction)
+
+	tx.Sign(*privateKey,prevTXs)
 	return &tx
+}
+
+//为普通交易绑定Sign方法
+//参数为：私钥，inputs里面引用的所有的交易实体 map[string]Transaction
+//map[交易ID]Transaction
+func (tx *Transaction) Sign(privateKey ecdsa.PrivateKey, prevTXs map[string]Transaction) {
+	//具体签名功能
+	//TODO
 }
