@@ -67,6 +67,13 @@ func (cli *CLI) Run() {
 		fmt.Printf("创建新的钱包...\n")
 		cli.NewWallet()
 	case "listAddresses":
+		//在读取之前，要先确认文件是否在，如果不存在，直接退出
+		_, err := os.Stat(walletFile)
+		if os.IsNotExist(err) {
+			//wallet.WalletMap[address]=key
+			fmt.Println("wallet.dat文件不存在！不存在地址！请先创建钱包！命令：\n./block newWallet")
+			return
+		}
 		fmt.Printf("列举所有地址...\n")
 		cli.ListAddresses()
 	default:

@@ -85,11 +85,14 @@ func NewCoinbaseTX(address, data string) *Transaction {
 	//2. 无需引用交易id 表名是挖矿交易
 	//3. 无需引用index 设置为-1 任意设置的
 	//矿工由于挖矿时无需指定签名，所以这个sig字段可以由矿工自由填写数据，一般是填写矿池的名字 例如	BTC.com
-	input := TXInput{[]byte("挖矿交易Id为空"), -1, data}
-	output := TXOutput{reward, address}
+	//签名信息先填为空，创建完整交易后，最后做一次签名
+	input := TXInput{[]byte{}, -1, nil,[]byte(data)}
+	//output := TXOutput{reward, address}
+
+	output:=NewTXOutput(reward,address)
 
 	//对于挖矿交易来说，只有一个input和一个output
-	tx := Transaction{[]byte{}, []TXInput{input}, []TXOutput{output}}
+	tx := Transaction{[]byte{}, []TXInput{input}, []TXOutput{*output}}
 	//计算交易ID
 	tx.SetHash()
 	return &tx
@@ -111,8 +114,26 @@ func (tx *Transaction) IsCoinbaseTX() bool {
 
 //3. 生成一笔普通交易（找零）
 func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction {
+
+	//a. 创建交易之后要进行数字签名->所以需要私钥->把 wallet.dat 中的密钥对加载到内存中
+	wallet := NewWallet()
+
+	//b. 找到自己的密钥对，把地址作为key找到value（即密钥对）
+	key := wallet.WalletMap[from]
+	if key == nil {
+		fmt.Printf("没有找到地址\"%s\"对应的密钥对，交易创建失败!\n",from)
+		return nil
+	}
+
+	//c. 得到对应的公钥，私钥
+	pubKey := key.PubKey
+	//privateKey := key.Private  //稍后再用
+
+	//传递公钥的哈希，而不是传递地址
+	pubKeyHash := HashPubKey(pubKey)
+
 	//1. 找到足够UTXO
-	utxos, totalMoney := bc.FindEnoughUTXO(from, amount)
+	utxos, totalMoney := bc.FindEnoughUTXO(pubKeyHash, amount)
 	if totalMoney < amount {
 		fmt.Printf("\"%s\"只有 %f 比特币，余额不足，交易失败！", from, totalMoney)
 		return nil
@@ -124,18 +145,20 @@ func NewOrdinaryTX(from, to string, amount float64, bc *BlockChain) *Transaction
 	var outputs []TXOutput
 	for TXid, indexSlice := range utxos {
 		for _, i := range indexSlice {
-			input := TXInput{[]byte(TXid), int64(i), from}
+			input := TXInput{[]byte(TXid), int64(i),nil,pubKey}
 			inputs = append(inputs, input)
 		}
 	}
 
 	//3. 创建交易输出
-	output := TXOutput{amount, to}
-	outputs = append(outputs, output)
+	//output := TXOutput{amount, to}
+	output :=NewTXOutput(amount,to)
+	outputs = append(outputs, *output)
 
 	//4. 找零
 	if totalMoney > amount {
-		outputs = append(outputs, TXOutput{totalMoney - amount, from})
+		output :=NewTXOutput(totalMoney - amount,from)
+		outputs = append(outputs, *output)
 	}
 
 	//5. 生成交易

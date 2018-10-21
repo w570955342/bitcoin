@@ -2,7 +2,7 @@ package main
 
 //7. 重构代码
 func main() {
-	blockChain:=NewBlockChain("张三")
+	blockChain:=NewBlockChain("1B7x744vTRR6EYQL3VAnfPYVaqdQaRZSy8")
 	cli := CLI{blockChain}
 	defer blockChain.Db.Close()
 	cli.Run()

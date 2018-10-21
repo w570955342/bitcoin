@@ -4,6 +4,7 @@ import (
 	"bolt"
 	"fmt"
 	"log"
+	"bytes"
 )
 
 //4. 引入区块链
@@ -92,7 +93,7 @@ func (bc *BlockChain) AddBlock(txs []*Transaction) {
 }
 
 //找到指定地址的所有UTXO
-func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
+func (bc *BlockChain) FindUTXOs(pubKeyHash []byte) []TXOutput {
 	var UTXO []TXOutput
 	//定义一个map来保存消费过的output，key是这个output的交易id，value是这个交易中索引的切片
 	//map[交易id][]int64
@@ -109,7 +110,7 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 		for _, tx := range block.Transactions {
 			//fmt.Printf("current TXId : %x\n", tx.TXId)
 		lable:
-			//3. 遍历 TXOutputs，找到和自己相关的UTXO(在添加output之前检查一下是否已经消耗过)
+		//3. 遍历 TXOutputs，找到和自己相关的UTXO(在添加output之前检查一下是否已经消耗过)
 			for i, output := range tx.TXOutputs {
 				//fmt.Printf("current index : %d\n", i)
 
@@ -130,7 +131,7 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 				}
 
 				//这个output和我们目标的地址相同，满足条件，加到返回UTXO数组中
-				if output.PubKeyHash == address {
+				if bytes.Equal(pubKeyHash, output.PubKeyHash) {
 					UTXO = append(UTXO, output)
 				}
 			}
@@ -140,7 +141,8 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 				//4. 遍历 TXInputs，找到自己花费过的UTXO的集合(把自己消耗过的标示出来)
 				for _, input := range tx.TXInputs {
 					//判断一下当前这个input和目标（李四）是否一致，如果相同，说明这个是李四消耗过的output,就加进来
-					if input.Sig == address {
+					inputPubKeyHash:=HashPubKey(input.PubKey)
+					if bytes.Equal(inputPubKeyHash, pubKeyHash) {
 						//spentOutputs := make(map[string][]int64)
 						//indexSlice := spentOutputs[string(input.Txid)]//定义一个空切片
 						//indexSlice = append(indexSlice, input.Index)
@@ -166,7 +168,7 @@ func (bc *BlockChain) FindUTXOs(address string) []TXOutput {
 
 //UTXO最重要的意义在于存在的钱数，input和output都为了转账
 //找到足够的UTXO，将所在交易的交易ID和所在交易的索引位置存在map中，map[string交易ID][]uint64{索引}
-func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]uint64, float64) {
+func (bc *BlockChain) FindEnoughUTXO(senderPubKeyHash []byte, amount float64) (map[string][]uint64, float64) {
 
 	//找到足够的UTXO
 	//var utxos map[string][]uint64//错误panic: assignment to entry in nil map，必须初始化空间才能用
@@ -186,7 +188,7 @@ func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]
 		for _, tx := range block.Transactions {
 			//fmt.Printf("current TXId : %x\n", tx.TXId)
 		lable:
-			//3. 遍历 TXOutputs，找到和自己相关的UTXO(在添加output之前检查一下是否已经消耗过)
+		//3. 遍历 TXOutputs，找到和自己相关的UTXO(在添加output之前检查一下是否已经消耗过)
 			for i, output := range tx.TXOutputs {
 				//fmt.Printf("current index : %d\n", i)
 
@@ -207,7 +209,7 @@ func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]
 				}
 
 				//这个output和我们目标的地址相同，满足条件，加到返回UTXO数组中
-				if output.PubKeyHash == from {
+				if bytes.Equal(output.PubKeyHash,senderPubKeyHash){
 					//UTXO = append(UTXO, output)
 					//找到足够的UTXO
 					if totalMoney < amount {
@@ -226,7 +228,8 @@ func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]
 				//4. 遍历 TXInputs，找到自己花费过的UTXO的集合(把自己消耗过的标示出来)
 				for _, input := range tx.TXInputs {
 					//判断一下当前这个input和目标（李四）是否一致，如果相同，说明这个是李四消耗过的output,就加进来
-					if input.Sig == from {
+					inputPubKeyHash:=HashPubKey(input.PubKey)
+					if bytes.Equal(inputPubKeyHash, senderPubKeyHash) {
 						//spentOutputs := make(map[string][]int64)
 						//indexSlice := spentOutputs[string(input.Txid)]//定义一个空切片
 						//indexSlice = append(indexSlice, input.Index)

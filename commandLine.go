@@ -22,7 +22,7 @@ func (cli *CLI) PrinBlockChain() {
 		fmt.Printf("难度值(随便写的）: %d\n", block.Difficulty)
 		fmt.Printf("随机数 : %d\n", block.Nonce)
 		fmt.Printf("当前区块哈希值: %x\n", block.Hash)
-		fmt.Printf("区块数据 :%s\n", block.Transactions[0].TXInputs[0].Sig)
+		fmt.Printf("区块数据 :%s\n", block.Transactions[0].TXInputs[0].PubKey)
 
 		if len(block.PrevHash) == 0 {
 			fmt.Println("区块链遍历结束！")
@@ -32,15 +32,15 @@ func (cli *CLI) PrinBlockChain() {
 }
 
 func (cli *CLI) GetBalance(address string) {
-
-	utxos := cli.bc.FindUTXOs(address)
-
-	total := 0.0
-	for _, utxo := range utxos {
-		total += utxo.Value
-	}
-
-	fmt.Printf("\"%s\"的余额为：%f\n", address, total)
+	//
+	//utxos := cli.bc.FindUTXOs(address)
+	//
+	//total := 0.0
+	//for _, utxo := range utxos {
+	//	total += utxo.Value
+	//}
+	//
+	//fmt.Printf("\"%s\"的余额为：%f\n", address, total)
 }
 
 func (cli *CLI) Send(from, to string, amount float64, miner, data string) {
