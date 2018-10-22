@@ -73,6 +73,15 @@ func GenesisBlock(address string) *Block {
 
 //6. 添加区块
 func (bc *BlockChain) AddBlock(txs []*Transaction) {
+
+	for _, tx := range txs {
+		if !bc.VerifyTransaction(tx) {
+			fmt.Println(tx)
+			fmt.Printf("矿工发现无效交易!")
+			return
+		}
+	}
+
 	db := bc.Db
 	lastBlockHash := bc.Tail //最后一个区块的Hash
 
