@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bolt"
+	"github.com/boltdb/bolt"
 	"fmt"
 	"log"
 )
@@ -211,10 +211,11 @@ func (bc *BlockChain) FindEnoughUTXO(from string, amount float64) (map[string][]
 					//UTXO = append(UTXO, output)
 					//找到足够的UTXO
 					if totalMoney < amount {
+						fmt.Printf("当前交易找到了 %f 比特币!\n",output.Value)
 						utxos[string(tx.TXId)] = append(utxos[string(tx.TXId)], uint64(i))
 						totalMoney += output.Value
 						if totalMoney >= amount {
-							fmt.Printf("找到了足够的金额：%f\n", totalMoney)
+							fmt.Printf("停止遍历交易，找到了足够的金额：%f 比特币\n", totalMoney)
 							return utxos, totalMoney
 						}
 					}

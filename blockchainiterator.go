@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bolt"
+	"github.com/boltdb/bolt"
 	"log"
 )
 

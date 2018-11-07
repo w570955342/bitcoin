@@ -13,9 +13,9 @@ type CLI struct {
 }
 
 const Usage = `
-	printChain               "print all blockchain data" 
-	getBalance --address ADDRESS "获取指定地址ADDRESS的余额"
-	send FROM TO AMOUNT MINER DATA "由FROM转AMOUNT给TO，由MINER挖矿，同时写入DATA"
+	printChain			"print all blockchain data" 
+	getBalance --address ADDRESS	"获取指定地址ADDRESS的余额"
+	send FROM TO AMOUNT MINER DATA	"由FROM转AMOUNT给TO，由MINER挖矿，同时写入DATA"
 `
 
 //接受参数的动作，我们放到一个函数中
@@ -35,16 +35,16 @@ func (cli *CLI) Run() {
 	cmd := args[1]
 	switch cmd {
 	case "printChain":
-		fmt.Printf("打印区块...\n")
+		fmt.Printf("\n打印区块...\n")
 		cli.PrinBlockChain()
 	case "getBalance":
-		fmt.Printf("获取余额...\n")
+		fmt.Printf("\n获取余额...\n")
 		if len(args) == 4 && args[2] == "--address" {
 			address := args[3]
 			cli.GetBalance(address)
 		}
 	case "send":
-		fmt.Printf("转账开始...\n")
+		fmt.Printf("\n转账开始...\n")
 		if len(args) != 7 {
 			fmt.Printf("参数个数错误，请检查！\n")
 			fmt.Printf(Usage)
